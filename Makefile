@@ -1,2 +1,8 @@
 ql: ql.c
-	cc ql.c -o ql
+	cc -Wall ql.c -o ql
+
+test:	ql ql.c
+	sed 's/(/ ( /g;s/)/ ) /g' ql.c | tr ' \011' '\012\012' | grep -v '^$$' > 1
+	./ql < ql.c > 2
+	diff 1 2
+	rm 1 2
