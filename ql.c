@@ -2,9 +2,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
 #define INBUF_SIZE 256
 char inbuf[INBUF_SIZE];
+
+char *punctuation[] = {
+	"(",
+	")",
+	"'"
+};
 
 char **symbols = NULL;
 size_t nsymbols = 0;
@@ -51,13 +56,19 @@ int process_chunk(int bytes_read, int last_chunk) {
 	int i, j;
 	for (i = 0, j = 0; i < bytes_read; i++) {
 		char c = inbuf[i];
-		if (isspace(c) || c == '(' || c == ')') {
+		char *punc_str = NULL;
+		for (int p = 0; p < sizeof(punctuation)/sizeof(char *); p++) {
+			if (c == punctuation[p][0]) {
+				punc_str = punctuation[p];
+				break;
+			}
+		}
+		if (isspace(c) || punc_str) {
 			if (i != j) {
 				inbuf[i] = 0;
 				push_sym_list(inbuf+j);
 			}
-			if (c == '(') push_sym_list("(");
-			if (c == ')') push_sym_list(")");
+			if (punc_str) push_sym_list(punc_str);
 			j = i+1;
 		}
 	}
