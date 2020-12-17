@@ -52,7 +52,8 @@ int hd(int p) {
 	if (p < 0 && -1 - p < npairs) {
 		return pairs[-1 - p].hd;
 	}
-	// not a pair
+	fprintf(stderr, "cannot take hd of non-cons\n");
+	exit(1);
 	return 0;
 }
 
@@ -60,7 +61,8 @@ int tl(int p) {
 	if (p < 0 && -1 - p < npairs) {
 		return pairs[-1 - p].tl;
 	}
-	// not a pair
+	fprintf(stderr, "cannot take tl of non-cons\n");
+	exit(1);
 	return 0;
 }
 
@@ -217,10 +219,12 @@ struct parse_t {
 	int next_token;
 };
 
+struct parse_t parse_exp(int next_token);
+
 struct parse_t parse_lst(int next_token) {
 	struct parse_t r = {0, next_token + 1};
 	if (next_token >= nsym_list) {
-		perror("unmatched `(`");
+		fprintf(stderr, "unmatched `(`\n");
 		exit(1);
 	}
 	int t = sym_list[next_token];
@@ -234,9 +238,16 @@ struct parse_t parse_lst(int next_token) {
 		r.next_token = tl.next_token;
 		return r;
 	}
-	struct parse_t tl = parse_lst(next_token + 1);
-	r.value = cons(t, tl.value);
-	r.next_token = tl.next_token;
+	if (t == Q) {
+		struct parse_t e = parse_exp(next_token+1); 
+		struct parse_t tl = parse_lst(e.next_token);
+		r.value = cons(cons(QUOTE, cons(e.value, 0)), tl.value);
+		r.next_token = tl.next_token;
+		return r;
+	}
+	struct parse_t e = parse_lst(next_token + 1);
+	r.value = cons(t, e.value);
+	r.next_token = e.next_token;
 	return r;
 }
 
@@ -249,8 +260,14 @@ struct parse_t parse_exp(int next_token) {
 	int t = sym_list[next_token];
 	if (t == LP) return parse_lst(next_token+1);
 	if (t == RP) {
-		perror("unmatched `)`");
+		fprintf(stderr, "unmatched `)`\n");
 		exit(1);
+	}
+	if (t == Q) {
+		struct parse_t e = parse_exp(next_token+1); 
+		r.value = cons(QUOTE, cons(e.value, 0));
+		r.next_token = e.next_token;
+		return r;
 	}
 	r.value = t;
 	return r;
