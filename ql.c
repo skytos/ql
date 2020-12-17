@@ -303,9 +303,7 @@ void init_symbols() {
 		push_symbol(builtins[i]);
 }
 
-int eval(int e) {
-	return e;
-}
+extern int eval(int e);
 
 int main() {
 	init_symbols();
