@@ -1,11 +1,15 @@
-ql: ql.o eval.o
-	cc -Wall ql.o eval.o -o ql
+CFLAGS = -Wall
+TESTS := $(shell find tests -name *.in | sed 's/.in$$/.diff/')
+OBJS = ql.o eval.o
 
-ql.o: ql.c
-	cc -Wall -c ql.c
-	
-eval.o: eval.c
-	cc -Wall -c eval.c
+ql: $(OBJS)
+	cc -Wall $(OBJS) -o ql
 
-test:	ql tests/*
-	@for n in tests/*.in; do echo $$n; ./ql < $$n 2>&1 | diff tests/`basename $$n .in`.out -; done
+clean:
+	rm *.o ql tests/*.diff
+
+tests/%.diff: ql tests/%.in tests/%.out
+	@echo $@
+	@./ql < tests/$*.in 2>&1 | diff tests/$*.out -
+
+test:	$(TESTS)
