@@ -11,11 +11,30 @@ char *punctuation[] = {
 	")",
 	"'"
 };
-
-int LP = 0;
-int RP = 1;
-int Q = 2;
-int QUOTE = 3;
+char *builtins[] = {
+	"quote",
+	"hd",
+	"tl",
+	"cons",
+	"cond",
+	"atom",
+	"eq",
+	"lambda"
+};
+// order needs to match above
+enum _builtins {
+	LP,
+	RP,
+	Q,
+	QUOTE,
+	HD,
+	TL,
+	CONS,
+	COND,
+	ATOM,
+	EQ,
+	LAMBDA
+};
 
 typedef struct _pair {
 	int hd;
@@ -278,9 +297,14 @@ struct parse_t parse_exp(int next_token) {
 }
 
 void init_symbols() {
-	for (int p = 0; p < sizeof(punctuation)/sizeof(char *); p++)
-		push_symbol(punctuation[p]);
-	push_symbol("quote");
+	for (int i = 0; i < sizeof(punctuation)/sizeof(char *); i++)
+		push_symbol(punctuation[i]);
+	for (int i = 0; i < sizeof(builtins)/sizeof(char *); i++)
+		push_symbol(builtins[i]);
+}
+
+int eval(int e) {
+	return e;
 }
 
 int main() {
@@ -289,7 +313,8 @@ int main() {
 	process_input();
 
 	for (struct parse_t p = parse_exp(0); p.next_token != -1; p = parse_exp(p.next_token)) {
-		printf("%s\n", to_s(p.value));
+		int val = eval(p.value);
+		printf("%s\n", to_s(val));
 	}
 
 	return 0;
