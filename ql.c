@@ -66,6 +66,10 @@ int tl(int p) {
 	return 0;
 }
 
+int quote(int e) {
+	return cons(QUOTE, cons(e, 0));
+}
+
 int push_symbol(char *symbol) {
 	for (int i = 0; i < nsymbols; i++) {
 		if (strcmp(symbol, symbols[i]) == 0) return i;
@@ -241,7 +245,7 @@ struct parse_t parse_lst(int next_token) {
 	if (t == Q) {
 		struct parse_t e = parse_exp(next_token+1); 
 		struct parse_t tl = parse_lst(e.next_token);
-		r.value = cons(cons(QUOTE, cons(e.value, 0)), tl.value);
+		r.value = cons(quote(e.value), tl.value);
 		r.next_token = tl.next_token;
 		return r;
 	}
@@ -265,7 +269,7 @@ struct parse_t parse_exp(int next_token) {
 	}
 	if (t == Q) {
 		struct parse_t e = parse_exp(next_token+1); 
-		r.value = cons(QUOTE, cons(e.value, 0));
+		r.value = quote(e.value);
 		r.next_token = e.next_token;
 		return r;
 	}
