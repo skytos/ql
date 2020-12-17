@@ -6,7 +6,7 @@ ql: $(OBJS)
 	cc -Wall $(OBJS) -o ql
 
 clean:
-	rm *.o ql tests/*.diff
+	-rm *.o ql
 
 tests/%.diff: ql tests/%.in tests/%.out
 	@echo $@
